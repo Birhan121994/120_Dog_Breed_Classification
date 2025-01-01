@@ -57,7 +57,7 @@ def get_wikipedia_summary(breed_name):
     return summary
 
 # Streamlit UI setup
-st.set_page_config(page_title="Dog Breed Classifier", layout="wide")
+st.set_page_config(page_title="Dog Breed Classifier")
 st.title("🐶 Dog Breed Classifier 🐶")
 st.markdown("""
 Welcome to the Dog Breed Classifier! 
@@ -66,14 +66,15 @@ Upload an image or use your camera to classify a dog breed, and get a brief desc
 st.markdown("---")
 
 # Sidebar with navigation using option_menu
-selected = option_menu(
-    menu_title="Main Menu",
-    options=['Browse File', 'Take Camera', 'Quiz app', 'Demo', 'Doc'],
-    icons=['house', 'yin-yang', 'file-bar-graph-fill', 'steam', 'book'],
-    menu_icon='cast',
-    default_index=0,
-    orientation="vertical"
-)
+with st.sidebar:
+    selected = option_menu(
+        menu_title="Main Menu",
+        options=['Browse File', 'Take Camera', 'Quiz app', 'Demo', 'Doc'],
+        icons=['house', 'yin-yang', 'file-bar-graph-fill', 'steam', 'book'],
+        menu_icon='cast',
+        default_index=0,
+        orientation="vertical"
+    )
 
 # Layout structure based on the selected option in the sidebar
 if selected == "Browse File":
