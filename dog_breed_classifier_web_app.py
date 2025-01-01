@@ -64,7 +64,7 @@ Welcome to the Dog Breed Classifier!
 Upload an image or use your camera to classify a dog breed, and get a brief description about it.
 """)
 st.markdown("---")
-st.sidebar.image('https://play-lh.googleusercontent.com/OS4jjud-yB4xdMyqfGMd_SAkAJTiOuGcoteNGFf_ruNM1rLgXpg2befa42yXiP5aJ1Q=w240-h200-rw', width=300)
+st.sidebar.image('https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/6a/1a/8e/6a1a8e7d-0ac6-b07f-4079-c4958c8e3be1/AppIcon-1x_U007epad-0-1-85-220-0.png/1200x600wa.png', width=300)
 # Sidebar with navigation using option_menu
 with st.sidebar:
     selected = option_menu(
