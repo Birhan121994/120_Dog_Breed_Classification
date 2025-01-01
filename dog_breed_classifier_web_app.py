@@ -64,13 +64,13 @@ Welcome to the Dog Breed Classifier!
 Upload an image or use your camera to classify a dog breed, and get a brief description about it.
 """)
 st.markdown("---")
-
+st.sidebar.image('https://play-lh.googleusercontent.com/OS4jjud-yB4xdMyqfGMd_SAkAJTiOuGcoteNGFf_ruNM1rLgXpg2befa42yXiP5aJ1Q=w240-h480-rw', width=300)
 # Sidebar with navigation using option_menu
 with st.sidebar:
     selected = option_menu(
         menu_title="Main Menu",
-        options=['Browse File', 'Take Camera', 'Quiz app', 'Demo', 'Doc'],
-        icons=['house', 'yin-yang', 'file-bar-graph-fill', 'steam', 'book'],
+        options=['Browse File', 'Take Camera', 'Doc'],
+        icons=['house', 'yin-yang', 'book'],
         menu_icon='cast',
         default_index=0,
         orientation="vertical"
@@ -149,12 +149,6 @@ elif selected == "Take Camera":
         wikipedia_summary = get_wikipedia_summary(breed_name)
         st.write(wikipedia_summary)
 
-elif selected == "Quiz app":
-    st.subheader("Quiz App (Coming Soon)")
-
-elif selected == "Demo":
-    st.subheader("Demo (Coming Soon)")
-
 elif selected == "Doc":
     st.subheader("Documentation")
     st.write("""
@@ -164,4 +158,4 @@ elif selected == "Doc":
 
 # Footer (Optional)
 st.markdown("---")
-st.markdown("Built with ❤️ by [Your Name]")
+st.markdown("Built with ❤️ by Birhan Tamiru")
