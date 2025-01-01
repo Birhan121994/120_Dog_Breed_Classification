@@ -6,9 +6,12 @@ from keras.applications.inception_v3 import preprocess_input
 import os
 from sklearn.preprocessing import LabelEncoder
 import wikipedia
-import requests
+import time
+import matplotlib.pyplot as plt
+import seaborn as sns
 from PIL import Image
 from io import BytesIO
+from streamlit_option_menu import option_menu
 
 # Load the trained model
 model = load_model('dog_breed_classifier_model_via_inceptionv3.h5')
@@ -62,24 +65,46 @@ Upload an image or use your camera to classify a dog breed, and get a brief desc
 """)
 st.markdown("---")
 
-# Layout structure
-col1, col2 = st.columns(2)
+# Sidebar with navigation using option_menu
+selected = option_menu(
+    menu_title="Main Menu",
+    options=['Browse File', 'Take Camera', 'Quiz app', 'Demo', 'Doc'],
+    icons=['house', 'yin-yang', 'file-bar-graph-fill', 'steam', 'book'],
+    menu_icon='cast',
+    default_index=0,
+    orientation="vertical"
+)
 
-with col1:
+# Layout structure based on the selected option in the sidebar
+if selected == "Browse File":
+    st.subheader("Upload Picture to Classify Breed")
+    
     # Allow users to upload an image
     image_file = st.file_uploader("Upload an Image", type=["jpg", "png", "jpeg"])
 
     if image_file:
         # Show the uploaded image
-        st.image(image_file, caption="Uploaded Image", use_container_width=True)
+        st.image(image_file, caption="Uploaded Image", use_column_width=True)
         
-        # Get predictions
-        top_5_breeds, top_5_probs = predict_breed(image_file)
+        # Show a loading spinner while processing
+        with st.spinner('Classifying breed...'):
+            time.sleep(2)  # Simulating a delay
+            
+            # Get predictions
+            top_5_breeds, top_5_probs = predict_breed(image_file)
         
         # Show predictions and confidence scores
         st.subheader("Top 5 Predicted Breeds:")
         for i in range(5):
             st.write(f"{i+1}. {top_5_breeds[i]} with {top_5_probs[i]*100:.2f}% confidence")
+        
+        # Plot a bar chart for breed confidence
+        fig, ax = plt.subplots()
+        sns.barplot(x=top_5_breeds, y=top_5_probs*100, ax=ax)
+        ax.set_title("Top 5 Breed Confidence")
+        ax.set_xlabel("Breed")
+        ax.set_ylabel("Confidence (%)")
+        st.pyplot(fig)
 
         # Fetch Wikipedia info for the top predicted breed
         breed_name = top_5_breeds[0]  # Most confident breed
@@ -87,27 +112,54 @@ with col1:
         wikipedia_summary = get_wikipedia_summary(breed_name)
         st.write(wikipedia_summary)
 
-with col2:
+elif selected == "Take Camera":
+    st.subheader("Use Camera to Classify Breed")
+
     # Capture image from the camera
     camera_image = st.camera_input("Take a picture")
 
     if camera_image:
         # Show the captured image
-        st.image(camera_image, caption="Captured Image", use_container_width=True)
+        st.image(camera_image, caption="Captured Image", use_column_width=True)
         
-        # Get predictions
-        top_5_breeds, top_5_probs = predict_breed(camera_image)
+        # Show a loading spinner while processing
+        with st.spinner('Classifying breed...'):
+            time.sleep(2)  # Simulating a delay
+            
+            # Get predictions
+            top_5_breeds, top_5_probs = predict_breed(camera_image)
         
         # Show predictions and confidence scores
         st.subheader("Top 5 Predicted Breeds:")
         for i in range(5):
             st.write(f"{i+1}. {top_5_breeds[i]} with {top_5_probs[i]*100:.2f}% confidence")
+        
+        # Plot a bar chart for breed confidence
+        fig, ax = plt.subplots()
+        sns.barplot(x=top_5_breeds, y=top_5_probs*100, ax=ax)
+        ax.set_title("Top 5 Breed Confidence")
+        ax.set_xlabel("Breed")
+        ax.set_ylabel("Confidence (%)")
+        st.pyplot(fig)
 
         # Fetch Wikipedia info for the top predicted breed
         breed_name = top_5_breeds[0]  # Most confident breed
         st.subheader(f"About {breed_name}:")
         wikipedia_summary = get_wikipedia_summary(breed_name)
         st.write(wikipedia_summary)
+
+elif selected == "Quiz app":
+    st.subheader("Quiz App (Coming Soon)")
+
+elif selected == "Demo":
+    st.subheader("Demo (Coming Soon)")
+
+elif selected == "Doc":
+    st.subheader("Documentation")
+    st.write("""
+        This app allows you to classify dog breeds by either uploading an image or using your camera.
+        The model predicts the breed and provides a short description fetched from Wikipedia.
+    """)
 
 # Footer (Optional)
 st.markdown("---")
