@@ -85,7 +85,7 @@ if selected == "Browse File":
 
     if image_file:
         # Show the uploaded image
-        st.image(image_file, caption="Uploaded Image", use_column_width=True)
+        st.image(image_file, caption="Uploaded Image", use_container_width=True)
         
         # Show a loading spinner while processing
         with st.spinner('Classifying breed...'):
@@ -113,7 +113,7 @@ elif selected == "Take Camera":
 
     if camera_image:
         # Show the captured image
-        st.image(camera_image, caption="Captured Image", use_column_width=True)
+        st.image(camera_image, caption="Captured Image", use_container_width=True)
         
         # Show a loading spinner while processing
         with st.spinner('Classifying breed...'):
