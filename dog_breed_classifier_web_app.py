@@ -63,7 +63,7 @@ Upload an image or use your camera to classify a dog breed, and get a brief desc
 st.markdown("---")
 
 # Layout structure
-col1, col2 = st.columns([1, 2])
+col1, col2 = st.columns(2)
 
 with col1:
     # Allow users to upload an image
@@ -71,7 +71,7 @@ with col1:
 
     if image_file:
         # Show the uploaded image
-        st.image(image_file, caption="Uploaded Image", use_column_width=True)
+        st.image(image_file, caption="Uploaded Image", use_container_width=True)
         
         # Get predictions
         top_5_breeds, top_5_probs = predict_breed(image_file)
@@ -93,7 +93,7 @@ with col2:
 
     if camera_image:
         # Show the captured image
-        st.image(camera_image, caption="Captured Image", use_column_width=True)
+        st.image(camera_image, caption="Captured Image", use_container_width=True)
         
         # Get predictions
         top_5_breeds, top_5_probs = predict_breed(camera_image)
