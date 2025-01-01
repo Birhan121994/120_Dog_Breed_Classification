@@ -98,14 +98,6 @@ if selected == "Browse File":
         st.subheader("Top 5 Predicted Breeds:")
         for i in range(5):
             st.write(f"{i+1}. {top_5_breeds[i]} with {top_5_probs[i]*100:.2f}% confidence")
-        
-        # Plot a bar chart for breed confidence
-        fig, ax = plt.subplots()
-        sns.barplot(x=top_5_breeds, y=top_5_probs*100, ax=ax)
-        ax.set_title("Top 5 Breed Confidence")
-        ax.set_xlabel("Breed")
-        ax.set_ylabel("Confidence (%)")
-        st.pyplot(fig)
 
         # Fetch Wikipedia info for the top predicted breed
         breed_name = top_5_breeds[0]  # Most confident breed
@@ -135,14 +127,6 @@ elif selected == "Take Camera":
         for i in range(5):
             st.write(f"{i+1}. {top_5_breeds[i]} with {top_5_probs[i]*100:.2f}% confidence")
         
-        # Plot a bar chart for breed confidence
-        fig, ax = plt.subplots()
-        sns.barplot(x=top_5_breeds, y=top_5_probs*100, ax=ax)
-        ax.set_title("Top 5 Breed Confidence")
-        ax.set_xlabel("Breed")
-        ax.set_ylabel("Confidence (%)")
-        st.pyplot(fig)
-
         # Fetch Wikipedia info for the top predicted breed
         breed_name = top_5_breeds[0]  # Most confident breed
         st.subheader(f"About {breed_name}:")
