@@ -1,4 +1,3 @@
-
 import streamlit as st
 import numpy as np
 from keras.preprocessing.image import img_to_array, load_img
@@ -43,37 +42,55 @@ def get_wikipedia_summary(breed_name):
     try:
         summary = wikipedia.summary(breed_name, sentences=3)  # Get summary of the breed
     except wikipedia.exceptions.DisambiguationError as e:
-        summary = wikipedia.summary(e.options[0], sentences=3)  # Try to get the summary of the first suggestion
+        summary = f"Sorry, there are multiple results for '{breed_name}'. Here's some information on {e.options[0]}."
+    except wikipedia.exceptions.HTTPTimeoutError:
+        summary = "Sorry, there was a network timeout while fetching information. Please try again later."
+    except wikipedia.exceptions.RedirectError:
+        summary = "Sorry, the breed name redirects to another page. Please check the spelling or try another breed."
+    except wikipedia.exceptions.PageError:
+        summary = "Sorry, no information found for this breed."
+    except Exception as e:
+        summary = f"An error occurred: {str(e)}"
     return summary
 
-
 # Streamlit UI setup
-st.title("Dog Breed Classifier")
-st.markdown("Upload an image or use your camera to classify a dog breed!")
+st.set_page_config(page_title="Dog Breed Classifier", layout="wide")
+st.title("🐶 Dog Breed Classifier 🐶")
+st.markdown("""
+Welcome to the Dog Breed Classifier! 
+Upload an image or use your camera to classify a dog breed, and get a brief description about it.
+""")
+st.markdown("---")
 
-# Allow users to upload an image or capture with camera
-image_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
-if image_file:
-    # Show the uploaded image
-    st.image(image_file, caption="Uploaded Image", use_column_width=True)
-    
-    # Get predictions
-    top_5_breeds, top_5_probs = predict_breed(image_file)
-    
-    # Show predictions and confidence scores
-    st.subheader("Top 5 Predicted Breeds:")
-    for i in range(5):
-        st.write(f"{i+1}. {top_5_breeds[i]} with {top_5_probs[i]*100:.2f}% confidence")
+# Layout structure
+col1, col2 = st.columns([1, 2])
 
-    # Fetch Wikipedia info for the top predicted breed
-    breed_name = top_5_breeds[0]  # Most confident breed
-    st.subheader(f"About {breed_name}:")
-    wikipedia_summary = get_wikipedia_summary(breed_name)
-    st.write(wikipedia_summary)
+with col1:
+    # Allow users to upload an image
+    image_file = st.file_uploader("Upload an Image", type=["jpg", "png", "jpeg"])
 
-elif st.button("Use Camera"):
+    if image_file:
+        # Show the uploaded image
+        st.image(image_file, caption="Uploaded Image", use_column_width=True)
+        
+        # Get predictions
+        top_5_breeds, top_5_probs = predict_breed(image_file)
+        
+        # Show predictions and confidence scores
+        st.subheader("Top 5 Predicted Breeds:")
+        for i in range(5):
+            st.write(f"{i+1}. {top_5_breeds[i]} with {top_5_probs[i]*100:.2f}% confidence")
+
+        # Fetch Wikipedia info for the top predicted breed
+        breed_name = top_5_breeds[0]  # Most confident breed
+        st.subheader(f"About {breed_name}:")
+        wikipedia_summary = get_wikipedia_summary(breed_name)
+        st.write(wikipedia_summary)
+
+with col2:
     # Capture image from the camera
     camera_image = st.camera_input("Take a picture")
+
     if camera_image:
         # Show the captured image
         st.image(camera_image, caption="Captured Image", use_column_width=True)
@@ -92,3 +109,6 @@ elif st.button("Use Camera"):
         wikipedia_summary = get_wikipedia_summary(breed_name)
         st.write(wikipedia_summary)
 
+# Footer (Optional)
+st.markdown("---")
+st.markdown("Built with ❤️ by [Your Name]")
