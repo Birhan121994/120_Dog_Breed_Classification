@@ -1,0 +1,7 @@
+.venv
+.streamlit
+.devcontainer
+__pycache__/
+*.py[cod]
+.env
+.qodo
