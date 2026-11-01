@@ -33,20 +33,43 @@ def sim_label(s):
     return ("Very similar", "") if s >= SIM_HIGH else ("Similar", "") if s >= SIM_MID else ("Weak resemblance", "")
 
 
+
 def match_rows(matches, show_contact_if_lost=True):
     if not matches:
         st.info("No registered dogs to compare against yet.")
         return
+
     for i, m in enumerate(matches, 1):
-        c1, c2 = st.columns([1, 5], vertical_alignment="center")
-        c1.image(m["path"], use_container_width=True)
+        c1, c2 = st.columns(
+            [1, 5],
+            vertical_alignment="center"
+        )
+
+        # Missing images now display a placeholder.
+        c1.image(
+            reg.photo_data(m),
+            use_container_width=True
+        )
+
         label, _ = sim_label(m["sim"])
-        extra = f" · Contact: {m['owner_contact']}" if show_contact_if_lost and m["status"] == "Lost" else ""
+
+        extra = (
+            f" · Contact: {m['owner_contact']}"
+            if show_contact_if_lost and m["status"] == "Lost"
+            else ""
+        )
+
         with c2:
-            html(f"<div class='match'><div class='mt'><b>{m['name']}</b> <span class='idno'>{m['id']}</span> "
-                 f"<span class='st {m['status']}'>{m['status']}</span>"
-                 f"<div>{chips([pretty(m['breed']), m['sex'], label])}</div>"
-                 f"<div class='note'>Visual similarity {m['sim']*100:.0f}%{extra}</div></div>{ring(max(m['sim'],0), 'sm')}</div>")
+            html(
+                f"<div class='match'><div class='mt'>"
+                f"<b>{m['name']}</b> "
+                f"<span class='idno'>{m['id']}</span> "
+                f"<span class='st {m['status']}'>{m['status']}</span>"
+                f"<div>{chips([pretty(m['breed']), m['sex'], label])}</div>"
+                f"<div class='note'>Visual similarity "
+                f"{m['sim']*100:.0f}%{extra}</div>"
+                f"</div>{ring(max(m['sim'],0), 'sm')}</div>"
+            )
 
 
 # ---- top bar ----
@@ -178,9 +201,19 @@ with tab_dogs:
         with t_prof:
             a, b = st.columns([1, 1.5], gap="large")
             with a:
-                st.image(shots[0]["path"], use_container_width=True)
-                if len(shots) > 1:
-                    st.image([s["path"] for s in shots[1:]], width=80)
+                if shots:
+                    st.image(
+                        reg.photo_data(shots[0]),
+                        use_container_width=True
+                    )
+
+                    if len(shots) > 1:
+                        st.image(
+                            [reg.photo_data(s) for s in shots[1:]],
+                            width=80
+                        )
+                else:
+                    st.info("No photos registered for this dog.")
             with b:
                 html(f"<div class='card'><span class='idno'>{d['id']}</span> <span class='st {d['status']}'>{d['status']}</span>"
                      f"<div class='nm disp' style='font-family:Sora;font-weight:800;font-size:2rem;margin:.3rem 0'>{d['name']}</div>"
@@ -191,12 +224,53 @@ with tab_dogs:
                      + (f"<p style='margin:.6rem 0 0'><b>Lost dog contact:</b> {d['owner_contact']}</p>" if d["status"] == "Lost" else "") + "</div>")
                 html("<div class='card'><h4>Breed traits</h4>" + trait_row("Energy", p["energy"]) + trait_row("Grooming needs", p["grooming"]) + trait_row("Trainability", p["train"]) + trait_row("Good with kids", p["kids"]) + "</div>")
         with t_card:
-            show_owner = st.toggle("Show owner name on the card", value=False)
-            png = make_card({**dict(d), "breed": pretty(d["breed"])}, shots[0]["path"], show_owner, age_text(d["dob"]))
-            st.image(png, use_container_width=True)
-            st.download_button("Download ID card (PNG)", png, file_name=f"{d['id']}.png", mime="image/png")
-            st.code(f"DogID {d['id']}: {d['name']}, {pretty(d['breed'])}. Verify with the DogID registry.", language=None)
-            st.caption("Cards hide the owner's contact details. Share the PNG or the text above.")
+            show_owner = st.toggle(
+                    "Show owner name on the card",
+                    value=False,
+                    key=f"show_owner_{d['id']}"
+                )
+
+            if not shots:
+                st.warning(
+                    "No photos available. "
+                    "Please upload a replacement under Manage → Add a photo."
+                )
+
+            else:
+                photo_bytes = reg.photo_data(shots[0])
+
+                png = make_card(
+                    {**dict(d), "breed": pretty(d["breed"])},
+                    photo_bytes,
+                    show_owner,
+                    age_text(d["dob"])
+                )
+
+                # Display the card exactly once.
+                st.image(
+                    png,
+                    caption="DogID Digital Identity Card",
+                    use_container_width=True
+                )
+
+                st.download_button(
+                    "Download ID card (PNG)",
+                    data=png,
+                    file_name=f"{d['id']}.png",
+                    mime="image/png",
+                    key=f"download_id_card_{d['id']}"
+                )
+
+                st.code(
+                    f"DogID {d['id']}: {d['name']}, "
+                    f"{pretty(d['breed'])}. Verify with the DogID registry.",
+                    language=None
+                )
+
+                st.caption(
+                    "Cards hide the owner's contact details. "
+                    "Share the PNG or the text above."
+                )
         with t_hist:
             x, y = st.columns(2, gap="large")
             with x:
@@ -233,10 +307,27 @@ with tab_dogs:
                     else:
                         st.error("Enter the new owner's name, contact and a PIN of 4+ characters.")
         with t_like:
-            st.caption("Other registered dogs that look similar to this dog's main photo.")
-            emb = np.frombuffer(shots[0]["emb"], dtype="float32")
-            match_rows(reg.find_similar(emb, exclude=d["id"]))
+            st.caption(
+                "Other registered dogs that look similar to this dog's main photo."
+            )
 
+            if shots:
+                emb = np.frombuffer(
+                    shots[0]["emb"],
+                    dtype="float32"
+                )
+
+                matches = reg.find_similar(
+                    emb,
+                    exclude=d["id"]
+                )
+
+                match_rows(matches)
+
+            else:
+                st.info(
+                    "No photo available for similarity matching."
+                )
 # ================= Find a dog =================
 with tab_find:
     st.markdown("### Found a dog? Compare it with the registry")
